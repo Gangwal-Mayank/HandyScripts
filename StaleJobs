@@ -41,7 +41,7 @@ def staleJobs(folder){
             }else{
                 returnValue.add(lastBuild.getParent().getFullName())
                 
-                //Uncomment the below line for diabling the identified stale jobs
+                //Uncomment the below line for disabling the identified stale jobs
                 //Jenkins.instance.getItemByFullName(lastBuild.getParent().getFullName()).disable()
             }
         }
