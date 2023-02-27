@@ -1,0 +1,50 @@
+import groovy.time.TimeCategory
+import com.cloudbees.hudson.plugins.folder.Folder
+import jenkins.model.*
+
+//Number of days to consider for Inactive Jobs
+definitionOfStaleInDays = 90
+
+//Folder Name to check inactive jobs
+// Examples -
+    //FolderName = "" (this will fetch all folders and items in them)
+    //FolderName = "[Folder1]" (this will fetch only items inside Folder1)
+    //FolderName = "[Folder1/Folder2]" (this will fetch items inside the path Folder1/Folder2 only)
+FolderName = "[Folder1]"
+
+secondstoBeSubtracted = (definitionOfStaleInDays * 86400)
+now = new Date()
+currentmillils =  now.getTime()
+evaluateSeconds =  (currentmillils/1000) - (secondstoBeSubtracted)
+returnValue = []
+def jenkinsFolders = Jenkins.instance.getAllItems()
+//println "${jenkinsFolders}"
+jenkinsFolders.each { folder ->
+  staleJobs(folder)
+}
+println "Result"
+returnValueUnique = returnValue.unique()
+println ("Total Number of Inactive Jobs: ${returnValueUnique.size}")
+for (int i = 0; i < returnValueUnique.size; i++) {
+    println(returnValueUnique[i]);
+}
+def staleJobs(folder){
+  if ((folder.toString()).contains("${FolderName}")){
+    use(TimeCategory) {
+        for(job in folder.getAllJobs()) {
+            Run lastBuild = job.getLastBuild();
+            if (lastBuild == null) {
+                continue
+            }
+            if ((lastBuild.startTimeInMillis/1000) > evaluateSeconds) {
+                continue
+            }else{
+                returnValue.add(lastBuild.getParent().getFullName())
+                
+                //Uncomment the below line for diabling the identified stale jobs
+                //Jenkins.instance.getItemByFullName(lastBuild.getParent().getFullName()).disable()
+            }
+        }
+    }
+ }
+}
