@@ -15,7 +15,7 @@ nodes = jenkins.nodes
 for node_name, node_obj in nodes.items():
     if (node_name != "Built-In Node"):
         # Parse the XML file
-        tree = ET.parse(f'/var/lib/jenkins/nodes/{node_name}/config.xml')
+        tree = ET.parse(f'{jenkinsHome}nodes/{node_name}/config.xml')
         root = tree.getroot()
         element_to_update = root.find(f'.//{elementToUpdate}')
         element_to_update.text = newValue
