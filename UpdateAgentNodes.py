@@ -2,7 +2,6 @@ from jenkinsapi.jenkins import Jenkins
 import xml.etree.ElementTree as ET
 import getpass
 print ("Please provide the details below:")
-# Initialize the Jenkins API object
 jenkins_url = input('Enter your controller url: ')
 username = input('Enter your UserName: ')
 password = getpass.getpass('Enter your Password: ')
@@ -12,7 +11,7 @@ newValue = input('Enter the new value: ')
 jenkins = Jenkins(jenkins_url, username=username, password=password)
 # Get the list of all nodes
 nodes = jenkins.nodes
-# Update the description element of the config.xml file for each node and save the changes
+# Update the element of the config.xml file for each node and save the changes
 for node_name, node_obj in nodes.items():
     if (node_name != "Built-In Node"):
         # Parse the XML file
