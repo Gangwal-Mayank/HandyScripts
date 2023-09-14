@@ -1,0 +1,61 @@
+pipeline {
+    agent none
+    stages {
+        stage('Parallel Stage') {
+            parallel {
+                stage('Agent 1') {
+                    agent {
+                        label 'agent1' // Replace 'agent1' with the label of your first agent
+                    }
+                    steps {
+                        // Define the steps to be executed on agent 1
+ script {
+                    // Define the SSH key(s) you want to add or remove
+                    def sshKeyToAdd = 'ssh-rsa <YOUR_PUBLIC_KEY-New> user@hostname'
+                    // Get the current authorized_keys file on the agent
+                     sshagent(['<CredentaialID>']) {
+                             currentKeys = readFile(file: '/PathTokeys/.ssh/authorized_keys')
+                    }
+                    // Check if the key is already in the authorized_keys file
+                   if (currentKeys.contains(sshKeyToAdd)) {
+                        echo "Key already authorized on the agent."
+                    } else {
+                        // Add the SSH key to the authorized_keys file
+                        sshagent(['<CredentaialID>']) {
+                            sh "echo \"$sshKeyToAdd\" >> ~/.ssh/authorized_keys"
+                        }
+                        echo "Key added to authorized_keys on the agent."
+                }
+            }
+                    }
+                }
+                stage('Agent 2') {
+                    agent {
+                        label 'agent2' // Replace 'agent2' with the label of your second agent
+                    }
+                    steps {
+                        // Define the steps to be executed on agent 2
+ script {
+                    // Define the SSH key(s) you want to add or remove
+                    def sshKeyToAdd = 'ssh-rsa <YOUR_PUBLIC_KEY_New> user@hostname'
+                    // Get the current authorized_keys file on the agent
+                     sshagent(['<CredentaialID>']) {
+                             currentKeys = readFile(file: '/PathToKeys/.ssh/authorized_keys')
+                    }
+                    // Check if the key is already in the authorized_keys file
+                   if (currentKeys.contains(sshKeyToAdd)) {
+                        echo "Key already authorized on the agent."
+                    } else {
+                        // Add the SSH key to the authorized_keys file
+                        sshagent(['<CredentaialID>']) {
+                            sh "echo \"$sshKeyToAdd\" >> ~/.ssh/authorized_keys"
+                        }
+                        echo "Key added to authorized_keys on the agent."
+                }
+            }
+                    }
+                }
+            }
+        }
+    }
+}

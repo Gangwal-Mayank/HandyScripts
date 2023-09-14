@@ -1,0 +1,35 @@
+pipeline {
+    agent none
+    stages {
+        stage('Update Authorized_keys') {
+            parallel {
+                stage('Agent 1') {
+                    agent {
+                        label "${allagentslist}" // Replace 'agent1' with the label of your first agent
+                    }
+            steps {
+                        // Define the steps to be executed on agent 1
+ script {
+                    // Define the SSH key(s) you want to add or remove
+                    def sshKeyToAdd = 'ssh-rsa <YOUR_PUBLIC_KEY2 - new11> user@hostname'
+                    // Get the current authorized_keys file on the agent
+                     sshagent(['<CredentialID>']) {
+                             currentKeys = readFile(file: '/PathTokeys/.ssh/authorized_keys')
+                    }
+                    // Check if the key is already in the authorized_keys file
+                   if (currentKeys.contains(sshKeyToAdd)) {
+                        echo "Key already authorized on the agent."
+                    } else {
+                        // Add the SSH key to the authorized_keys file
+                        sshagent(['CredentialID']) {
+                            sh "echo \"$sshKeyToAdd\" >> ~/.ssh/authorized_keys"
+                        }
+                        echo "Key added to authorized_keys on the agent."
+                }
+            }
+        }
+    }
+}
+}
+}
+}
