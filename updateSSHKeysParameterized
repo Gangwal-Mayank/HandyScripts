@@ -8,9 +8,9 @@ pipeline {
                         label "${allagentslist}" // Replace 'agent1' with the label of your first agent
                     }
             steps {
-                        // Define the steps to be executed on agent 1
+                        // Define the steps to be executed on agent
  script {
-                    // Define the SSH key(s) you want to add or remove
+                    // Define the SSH key(s) you want to add
                     def sshKeyToAdd = 'ssh-rsa <YOUR_PUBLIC_KEY2 - new11> user@hostname'
                     // Get the current authorized_keys file on the agent
                      sshagent(['<CredentialID>']) {
