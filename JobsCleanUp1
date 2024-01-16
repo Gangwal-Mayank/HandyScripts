@@ -1,3 +1,4 @@
+// This script cleans up the jobs in a specified folder that is not executed in last two hours and is disabled
 import jenkins.model.Jenkins
 import hudson.util.RunList
 
@@ -6,7 +7,7 @@ def folder = Jenkins.instance.getItemByFullName(folderPath)
 
 if (folder) {
     def currentMillis = System.currentTimeMillis()
-    def twoHoursAgoMillis = currentMillis - (2 * 60 * 60 * 200) // 2 hours in milliseconds
+    def twoHoursAgoMillis = currentMillis - (2 * 60 * 60 * 1000) // 2 hours in milliseconds
     
     def recentJobs = Jenkins.instance.getAllItems(Job.class).findAll { job ->
         job.getFullName().startsWith(folderPath) &&
