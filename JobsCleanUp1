@@ -1,0 +1,25 @@
+import jenkins.model.Jenkins
+import hudson.util.RunList
+
+def folderPath = 'QA' // Replace with your actual folder path
+def folder = Jenkins.instance.getItemByFullName(folderPath)
+
+if (folder) {
+    def currentMillis = System.currentTimeMillis()
+    def twoHoursAgoMillis = currentMillis - (2 * 60 * 60 * 200) // 2 hours in milliseconds
+    
+    def recentJobs = Jenkins.instance.getAllItems(Job.class).findAll { job ->
+        job.getFullName().startsWith(folderPath) &&
+        job.disabled &&
+        job.getLastBuild()?.getTimeInMillis() >= twoHoursAgoMillis
+    }
+
+    recentJobs.each { job ->
+        job.delete()
+        println("Deleted Job: ${job.displayName}")
+        //println("Recent Job Name: ${job.displayName}")
+    }
+} else {
+    println("Folder not found: ${folderPath}")
+}
+
