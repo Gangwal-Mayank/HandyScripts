@@ -12,7 +12,7 @@ if (folder) {
     def recentJobs = Jenkins.instance.getAllItems(Job.class).findAll { job ->
         job.getFullName().startsWith(folderPath) &&
         job.disabled &&
-        job.getLastBuild()?.getTimeInMillis() >= timetofilter
+        job.getLastBuild()?.getTimeInMillis() < timetofilter
     }
 
     recentJobs.each { job ->
