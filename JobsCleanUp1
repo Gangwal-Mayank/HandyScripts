@@ -12,13 +12,15 @@ if (folder) {
     def recentJobs = Jenkins.instance.getAllItems(Job.class).findAll { job ->
         job.getFullName().startsWith(folderPath) &&
         job.disabled &&
-        job.getLastBuild()?.getTimeInMillis() < timetofilter
+        job.getLastBuild()?.getTimeInMillis() < timetofilter &&
+        job.getLastBuild()?.number > 0
     }
 
     recentJobs.each { job ->
-        job.delete()
-        println("Deleted Job: ${job.displayName}")
-        //println("Recent Job Name: ${job.displayName}")
+        //job.delete()
+        //println("Deleted Job: ${job.displayName}")
+        println("Recent Job Name: ${job.displayName}")
+        println("Recent Job Name: ${job.getFullName()}")
     }
 } else {
     println("Folder not found: ${folderPath}")
