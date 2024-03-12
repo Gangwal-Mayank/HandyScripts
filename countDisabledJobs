@@ -1,0 +1,16 @@
+// count of disabled jobs
+import hudson.model.*
+
+def thresholdDays = 1000
+def currentTime = System.currentTimeMillis()
+
+Jenkins.instance.getAllItems(Job).each { job ->
+    if (!job.isDisabled()) {
+        return
+    }
+
+    def lastBuild = job.getLastBuild()
+    if (lastBuild == null || (currentTime - lastBuild.getTimeInMillis()) > (thresholdDays * 24 * 60 * 60 * 1000)) {
+        println("Job ${job.fullName} is disabled and hasn't run for ${thresholdDays} days.")
+    }
+}
