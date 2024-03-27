@@ -32,7 +32,7 @@ def searchStringInLogBuild(build, string) {
     for (String line = reader.readLine(); line != null; line = reader.readLine()) {
       if (line =~ string) {
         println "Build being executed and it's going to be killed: $build.project in build Nº$build.number"
-        Uncomment the below line to kill the pending builds
+        //Uncomment the below line to kill the pending builds
         //build.doKill()
         println "-------------"
       }
