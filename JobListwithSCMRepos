@@ -1,0 +1,30 @@
+import jenkins.model.Jenkins
+import com.cloudbees.hudson.plugins.folder.Folder
+// Function to recursively list jobs in a folder and its subfolders
+def listJobsInFolder(folder) {
+    folder.getItems().each { item ->
+        if (item instanceof Folder) {
+            listJobsInFolder(item) // Recursively call the function for subfolders
+        } else {
+            def scm = null
+            if (item instanceof org.jenkinsci.plugins.workflow.job.WorkflowJob) {
+                def definition = item.getDefinition()
+                if (definition instanceof org.jenkinsci.plugins.workflow.cps.CpsScmFlowDefinition) {
+                    scm = definition.getScm()
+                }
+            } else if (item instanceof hudson.model.FreeStyleProject) {
+                scm = item.getSCMs().find { it instanceof hudson.plugins.git.GitSCM }
+            }
+
+            if (scm) {
+                def repoUrl = scm.getUserRemoteConfigs()[0].getUrl()
+                println("Job: ${item.fullName}, Repository: ${repoUrl}")
+            }
+        }
+    }
+}
+
+def folderPath = "Folder1" // e.g., "folder/subfolder"
+def folder = Jenkins.instance.getItemByFullName(folderPath)
+
+listJobsInFolder(folder)
