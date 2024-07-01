@@ -1,0 +1,4 @@
+ectool findObjects property --quickSearchFilter 'mayank' | \
+xmllint --xpath "//propertyName/text() | //value/text()" - | \
+paste -d ' ' - - | \
+while read -r propertyName value; do echo "PropertyName: $propertyName Value: $value"; done
