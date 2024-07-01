@@ -1,0 +1,12 @@
+#!/bin/bash
+# Replace with your project name
+PROJECT_NAME="Default"
+# Get the list of schedules in the project
+schedules_xml=$(ectool getSchedules "$PROJECT_NAME")
+# Parse the schedules XML to extract schedule names
+schedule_names=$(echo "$schedules_xml" | xmllint --xpath "//scheduleName/text()" -)
+# Loop through each schedule and get the value of scheduleDisabled
+for schedule in $schedule_names; do
+    scheduleDisabled=$(ectool getProperty "/projects/$PROJECT_NAME/schedules/$schedule/scheduleDisabled")
+    echo "Schedule: $schedule, scheduleDisabled: $scheduleDisabled"
+done
