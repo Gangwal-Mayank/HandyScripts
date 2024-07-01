@@ -1,0 +1,19 @@
+#!/bin/sh
+# Replace these variables with your actual values
+CD_SERVER="cd-server/"
+USERNAME="username"
+PASSWORD="passwd"
+# Execute the cURL command and store the response
+RESPONSE=$(curl -s -X POST https://$CD_SERVER/rest/v1.0/sessions \
+     -H "Content-Type: application/json" \
+     -d '{
+           "userName": "'"$USERNAME"'",
+           "password": "'"$PASSWORD"'"
+         }')
+echo "RESPONSE: $RESPONSE"
+# Extract the sessionId from the response
+#SESSION_ID=$(echo $RESPONSE | jq -r '.sessionId')
+# Print the sessionId
+#echo "Session ID: $SESSION_ID"
+# Optionally, you can save the sessionId to a property
+# ectool setProperty "/myJob/sessionId" --value "$SESSION_ID"
