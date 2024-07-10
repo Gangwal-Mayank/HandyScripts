@@ -1,0 +1,47 @@
+import jenkins.model.*
+import hudson.util.*
+import java.net.URL
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.io.File
+
+def pluginManager = Jenkins.instance.pluginManager
+def pluginDir = pluginManager.rootDir
+
+// Define the URL of the HPI file and the filename
+def pluginUrl = new URL("https://jenkins-updates.cloudbees.com/download/plugins/cloudbees-quiet-start/1.9/cloudbees-quiet-start.hpi")
+def pluginFilename = "cloudbees-quiet-start.hpi"
+
+// Define the temporary download location
+def tempDownloadPath = "/tmp/${pluginFilename}"
+boolean fileSuccessfullyDeleted =  new File(tempDownloadPath).delete()  
+println fileSuccessfullyDeleted
+// Download the HPI file
+println "Downloading ${pluginFilename} from ${pluginUrl}..."
+pluginUrl.withInputStream { input ->
+    Files.copy(input, Paths.get(tempDownloadPath))
+}
+println "Download completed."
+
+// Proceed with the installation
+def pluginFile = new File(tempDownloadPath)
+
+if (pluginFile.exists()) {
+    def tmpFile = new File(pluginDir, pluginFilename)
+    pluginFile.withInputStream { input ->
+        tmpFile.withOutputStream { output ->
+            output << input
+        }
+    }
+    pluginManager.dynamicLoad(tmpFile)
+    println "Plugin ${pluginFilename} installed successfully."
+} else {
+    println "Plugin file ${pluginFilename} not found."
+}
+
+// Optionally delete the downloaded file
+//pluginFile.delete()
+
+//Restart Controller
+//println "Restarting Controller"
+//Jenkins.instance.restart()
