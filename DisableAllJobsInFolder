@@ -1,0 +1,17 @@
+import com.cloudbees.hudson.plugins.folder.AbstractFolder
+import hudson.model.Job
+def folderName = "Folder1" // Change value to the full name of the folder you want to disable all jobs in
+def folder = Jenkins.instance.getItemByFullName(folderName, AbstractFolder)
+if (folder == null) {
+    println("Folder not found: ${folderName}")
+    return
+}
+folder.getAllItems().findAll { it instanceof Job || it instanceof AbstractFolder }.each { item ->
+    try {
+        item.makeDisabled(true)
+        println("Disabled job: [${item.fullName}]")
+    } catch (Exception e) {
+        println("Failed to disable job: [${item.fullName}]. Error: ${e.message}")
+    }
+}
+null
