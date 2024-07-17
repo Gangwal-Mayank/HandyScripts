@@ -1,0 +1,23 @@
+import jenkins.model.*
+
+// Define the plugin ID to check and disable
+def pluginId = "user-activity-monitoring"
+
+// Get the Jenkins instance and plugin manager
+def jenkins = Jenkins.instance
+def pluginManager = jenkins.pluginManager
+
+// Check if the plugin is installed
+
+def existingPlugin = pluginManager.getPlugin(pluginId)
+    if (existingPlugin) {
+        println "Plugin ${pluginId} (${existingPlugin.getVersion()}) is already installed. Disabling..."
+
+        // Disable the plugin
+        existingPlugin.disable()
+
+        println "Plugin ${pluginId} disabled."
+    }
+else {
+  println "Plugin ${pluginId} not installed."
+}
