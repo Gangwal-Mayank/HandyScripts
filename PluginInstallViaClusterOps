@@ -5,43 +5,57 @@ import java.nio.file.Files
 import java.nio.file.Paths
 import java.io.File
 
-def pluginManager = Jenkins.instance.pluginManager
-def pluginDir = pluginManager.rootDir
+try {
+    def pluginManager = Jenkins.instance.pluginManager
+    def pluginDir = pluginManager.rootDir
 
-// Define the URL of the HPI file and the filename
-def pluginUrl = new URL("https://jenkins-updates.cloudbees.com/download/plugins/cloudbees-quiet-start/1.9/cloudbees-quiet-start.hpi")
-def pluginFilename = "cloudbees-quiet-start.hpi"
+    // Define a list of plugins to install with their IDs and URLs
+    def plugins = [
+        ["cloudbees-quiet-start", "https://jenkins-updates.cloudbees.com/download/plugins/cloudbees-quiet-start/1.9/cloudbees-quiet-start.hpi"],
+        ["beer", "https://updates.jenkins.io/download/plugins/beer/42.v776b_04d96de3/beer.hpi"]
+        // Add more plugins as needed in the same format
+    ]
 
-// Define the temporary download location
-def tempDownloadPath = "/tmp/${pluginFilename}"
-boolean fileSuccessfullyDeleted =  new File(tempDownloadPath).delete()  
-println fileSuccessfullyDeleted
-// Download the HPI file
-println "Downloading ${pluginFilename} from ${pluginUrl}..."
-pluginUrl.withInputStream { input ->
-    Files.copy(input, Paths.get(tempDownloadPath))
-}
-println "Download completed."
+    plugins.each { pluginInfo ->
+        def pluginId = pluginInfo[0]
+        def pluginUrl = new URL(pluginInfo[1])
+        def pluginFilename = "${pluginId}.hpi"
+        def tempDownloadPath = "/tmp/${pluginFilename}"
 
-// Proceed with the installation
-def pluginFile = new File(tempDownloadPath)
+        // Ensure the temporary file is deleted before download
+        boolean fileSuccessfullyDeleted = new File(tempDownloadPath).delete()
+        println "Previous file deleted: ${fileSuccessfullyDeleted}"
 
-if (pluginFile.exists()) {
-    def tmpFile = new File(pluginDir, pluginFilename)
-    pluginFile.withInputStream { input ->
-        tmpFile.withOutputStream { output ->
-            output << input
+        // Download the HPI file
+        println "Downloading ${pluginFilename} from ${pluginUrl}..."
+        pluginUrl.withInputStream { input ->
+            Files.copy(input, Paths.get(tempDownloadPath))
+        }
+        println "Download completed."
+
+        // Proceed with the installation
+        def pluginFile = new File(tempDownloadPath)
+        def destinationFile = new File(pluginDir, pluginFilename)
+
+        if (pluginFile.exists()) {
+            // Copy downloaded plugin file to Jenkins plugins directory
+            Files.copy(pluginFile.toPath(), destinationFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+            println "Plugin ${pluginFilename} installed successfully."
+
+            // Clean up: Delete the downloaded file
+            pluginFile.delete()
+            println "Temporary file deleted: ${!pluginFile.exists()}"
+        } else {
+            println "Plugin file ${pluginFilename} not found."
         }
     }
-    pluginManager.dynamicLoad(tmpFile)
-    println "Plugin ${pluginFilename} installed successfully."
-} else {
-    println "Plugin file ${pluginFilename} not found."
+
+    // Optionally restart Jenkins to apply changes to all plugins
+    
+    println "Restarting Jenkins..."
+    Jenkins.instance.restart()
+   
+} catch (Exception e) {
+    println "Error occurred: ${e.message}"
+    e.printStackTrace()
 }
-
-// Optionally delete the downloaded file
-//pluginFile.delete()
-
-//Restart Controller
-//println "Restarting Controller"
-//Jenkins.instance.restart()
