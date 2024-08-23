@@ -1,0 +1,48 @@
+import jenkins.model.Jenkins
+import com.cloudbees.plugins.credentials.CredentialsProvider
+import com.cloudbees.plugins.credentials.domains.Domain
+import com.cloudbees.jenkins.plugins.vault.credentials.VaultUsernamePasswordCredentials
+import com.cloudbees.jenkins.plugins.vault.credentials.GenericKV2SecretEngine
+import com.cloudbees.jenkins.plugins.vault.credentials.VaultSecretEngine
+import hudson.util.XStream2
+// Define the credential details
+def id = "testUnamePword"
+def description = "test_SVC_Account"
+def path = "secret"
+def mountPath = "jenkins"
+def usernameKey = "username"
+def passwordKey = "password"
+// Create XML representation of the credential
+def credentialXml = """
+<com.cloudbees.jenkins.plugins.vault.credentials.VaultUsernamePasswordCredentials plugin="cloudbees-hashicorp-vault@0.23">
+ <scope>GLOBAL</scope>
+ <id>${id}</id>
+ <description>${description}</description>
+ <vaultSecretEngine class="com.cloudbees.jenkins.plugins.vault.credentials.GenericKV2SecretEngine">
+  <path>${path}</path>
+  <mountPath>${mountPath}</mountPath>
+ </vaultSecretEngine>
+ <usernameKey>${usernameKey}</usernameKey>
+ <passwordKey>${passwordKey}</passwordKey>
+</com.cloudbees.jenkins.plugins.vault.credentials.VaultUsernamePasswordCredentials>
+"""
+// Get Jenkins instance and the global domain
+def jenkins = Jenkins.getInstance()
+def domain = Domain.global()
+// Find the Vault Credentials Provider store
+def store = CredentialsProvider.lookupStores(jenkins).find { it.getProvider().getDisplayName() == 'Vault Credentials Provider' }
+if (store) {
+   try {
+     // Parse the XML to create the credential object
+     def xstream = new XStream2()
+     def credential = xstream.fromXML(credentialXml) as VaultUsernamePasswordCredentials
+     // Add the new credential to the store
+    store.addCredentials(domain, credential)
+     println "Credential added successfully."
+  } catch (Exception e) {
+     println "An unexpected error occurred: ${e.message}"
+    e.printStackTrace()
+  }
+} else {
+   println "Vault Credentials Provider store not found."
+}
