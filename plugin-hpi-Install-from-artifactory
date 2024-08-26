@@ -1,0 +1,82 @@
+import jenkins.model.*
+import hudson.util.*
+import java.net.URL
+import java.nio.file.Files
+import java.nio.file.Paths
+import java.io.File
+
+// Define the credentials ID and Artifactory URL
+def credentialsId = 'artifactory-credentials-id'
+def artifactoryBaseUrl = 'https://your-artifactory-instance/artifactory/your-repository'
+def pluginDir = Jenkins.instance.pluginManager.rootDir
+
+// List of plugins to install with their IDs and file names
+def plugins = [
+    ["cloudbees-quiet-start", "cloudbees-quiet-start/1.9/cloudbees-quiet-start.hpi"],
+    ["beer", "beer/42.v776b_04d96de3/beer.hpi"]
+    // Add more plugins as needed
+]
+
+// Retrieve credentials from Jenkins
+def credentials = Jenkins.instance.getExtensionList('com.cloudbees.plugins.credentials.SystemCredentialsProvider')[0]
+        .getStore().getCredentials(com.cloudbees.plugins.credentials.common.UsernamePasswordCredentials.class)
+        .find { it.id == credentialsId }
+
+if (credentials == null) {
+    println "Credentials not found"
+    return
+}
+
+def username = credentials.username
+def password = Secret.toString(credentials.password)
+
+// Download and install plugins
+plugins.each { pluginInfo ->
+    def pluginId = pluginInfo[0]
+    def pluginPath = pluginInfo[1]
+    def pluginFilename = "${pluginId}.hpi"
+    def tempDownloadPath = "/tmp/${pluginFilename}"
+    def artifactoryUrl = "${artifactoryBaseUrl}/${pluginPath}"
+
+    try {
+        // Ensure the temporary file is deleted before download
+        def tempFile = new File(tempDownloadPath)
+        if (tempFile.exists()) {
+            boolean fileSuccessfullyDeleted = tempFile.delete()
+            println "Previous file deleted: ${fileSuccessfullyDeleted}"
+        }
+
+        // Download the HPI file from Artifactory
+        println "Downloading ${pluginFilename} from ${artifactoryUrl}..."
+        def url = new URL(artifactoryUrl)
+        def connection = url.openConnection()
+        connection.setRequestProperty('Authorization', 'Basic ' + "${username}:${password}".bytes.encodeBase64().toString())
+        
+        connection.withInputStream { input ->
+            Files.copy(input, Paths.get(tempDownloadPath))
+        }
+        println "Download completed."
+
+        // Install the plugin
+        def destinationFile = new File(pluginDir, pluginFilename)
+        def downloadedFile = new File(tempDownloadPath)
+        
+        if (downloadedFile.exists()) {
+            Files.copy(downloadedFile.toPath(), destinationFile.toPath(), java.nio.file.StandardCopyOption.REPLACE_EXISTING)
+            println "Plugin ${pluginFilename} installed successfully."
+
+            // Clean up: Delete the temporary file
+            boolean fileSuccessfullyDeleted = downloadedFile.delete()
+            println "Temporary file deleted: ${fileSuccessfullyDeleted}"
+        } else {
+            println "Plugin file ${pluginFilename} not found."
+        }
+    } catch (Exception e) {
+        println "Error occurred while processing ${pluginFilename}: ${e.message}"
+        e.printStackTrace()
+    }
+}
+
+// Optionally restart Jenkins to apply changes to all plugins
+println "Restarting Jenkins..."
+Jenkins.instance.restart()
