@@ -1,0 +1,36 @@
+import jenkins.model.*
+import hudson.model.*
+import hudson.PluginManager
+
+// Get Jenkins instance
+def jenkins = Jenkins.instance
+
+// Get list of installed plugins
+def plugins = jenkins.pluginManager.plugins
+def pluginDetails = [:]
+
+// Collect plugin details
+plugins.each { plugin ->
+    def pluginName = plugin.getShortName()
+    def pluginVersion = plugin.getVersion()
+    pluginDetails[pluginName] = [version: pluginVersion, jobs: []]
+}
+
+// Iterate over all jobs and check for plugin usage
+jenkins.getAllItems(Job.class).each { job ->
+    def configXml = job.getConfigFile().asString()
+    
+    pluginDetails.each { pluginName, details ->
+        if (configXml.contains(pluginName)) {
+            details.jobs << job.getFullName()
+        }
+    }
+}
+
+// Print out the results
+pluginDetails.each { pluginName, details ->
+    println "Plugin: ${pluginName} (Version: ${details.version})"
+    details.jobs.each { jobName ->
+        println "  Job: ${jobName}"
+    }
+}
