@@ -1,0 +1,32 @@
+import jenkins.model.*
+import com.cloudbees.plugins.credentials.*
+import com.cloudbees.jenkins.plugins.sshcredentials.*
+import hudson.model.*
+
+// Replace with your nested folder path
+def folderPath = 'Foldertest/Foldertest2'
+// Replace with your SSH credential ID
+def credentialId = 'credID'
+
+// Get the nested folder
+def folder = Jenkins.instance.getItemByFullName(folderPath)
+
+if (folder) {
+    // Get SSH credentials from the folder
+    def credentials = CredentialsProvider.lookupCredentials(
+        SSHUserPrivateKey.class,
+        folder,
+        null,
+        null
+    )
+
+    credentials.each { cred ->
+        if (cred.id == credentialId) {
+            println "ID: ${cred.id}"
+            println "Username: ${cred.username}"
+            println "Private Key: ${cred.privateKey}" // Outputs the private key directly
+        }
+    }
+} else {
+    println "Folder not found: ${folderPath}"
+}
