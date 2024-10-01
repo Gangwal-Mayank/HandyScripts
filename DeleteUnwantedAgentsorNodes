@@ -1,0 +1,27 @@
+import jenkins.model.*
+import hudson.model.*
+
+def nodesToDelete = []
+
+// Get all nodes (agents)
+Jenkins.instance.getNodes().each { node ->
+    def version = node.getComputer().getSystemProperties().get("java.version")
+    
+    if (version) {
+        println("${node.displayName} - Java Version: ${version}")
+    } else {
+        println("${node.displayName} - Java version not available. Marking for deletion.")
+        nodesToDelete.add(node)
+    }
+}
+
+// Delete nodes without a Java version
+nodesToDelete.each { node ->
+    try {
+        println("Deleting node: ${node.displayName}")
+      Jenkins.instance.removeNode(node)  
+      //node.getComputer().doDelete()  // Correct method to delete the node
+    } catch (Exception e) {
+        println("Failed to delete node ${node.displayName}: ${e.message}")
+    }
+}
