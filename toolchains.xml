@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<toolchains>
+  <!-- JDK toolchains -->
+  <toolchain>
+    <type>jdk</type>
+    <provides>
+      <version>1.8</version>
+      <vendor>openjdk</vendor>
+    </provides>
+    <configuration>
+            <jdkHome>/usr/lib/jvm/java-1.8.0-openjdk</jdkHome>
+    </configuration>
+  </toolchain>
+  <toolchain>
+    <type>jdk</type>
+    <provides>
+      <version>11</version>
+      <vendor>openjdk</vendor>
+    </provides>
+    <configuration>
+      <jdkHome>/usr/lib/jvm/jre-11-openjdk</jdkHome>
+    </configuration>
+  </toolchain>
+</toolchains>
