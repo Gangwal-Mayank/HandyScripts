@@ -1,0 +1,25 @@
+def maxBuildsToKeep = 10 // Set the maximum number of builds to keep
+def projectName = 'TestMultiBranch1' // Name of the multi-branch pipeline
+
+def project = Jenkins.instance.getItem(projectName)
+
+if (project && project.class.name == 'org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject') {
+    project.getItems().each { branch ->
+        def builds = branch.builds.toList() // Convert to a list for sorting
+        if (builds.size() > maxBuildsToKeep) {
+            // Sort builds by build number (ascending) and keep the oldest
+            builds.sort { it.number }.take(builds.size() - maxBuildsToKeep).each { build ->
+                try {
+                    println "Deleting build #${build.number} from branch ${branch.name}"
+                    build.delete()
+                } catch (UnsupportedOperationException e) {
+                    println "Failed to delete build #${build.number} from branch ${branch.name}: ${e.message}"
+                } catch (Exception e) {
+                    println "An unexpected error occurred while deleting build #${build.number} from branch ${branch.name}: ${e.message}"
+                }
+            }
+        }
+    }
+} else {
+    println "Project '${projectName}' is not a MultiBranchProject or does not exist."
+}
