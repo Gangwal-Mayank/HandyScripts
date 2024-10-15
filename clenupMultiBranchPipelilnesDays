@@ -1,0 +1,28 @@
+def daysToKeep = 30 // Set the number of days to keep
+def projectName = 'TestMultiBranch1' // Name of the multi-branch pipeline
+
+def project = Jenkins.instance.getItem(projectName)
+
+if (project && project.class.name == 'org.jenkinsci.plugins.workflow.multibranch.WorkflowMultiBranchProject') {
+    def now = new Date()
+    project.getItems().each { branch ->
+        def builds = branch.builds.toList() // Convert to a list for processing
+        builds.each { build ->
+            def buildDate = new Date(build.getTimeInMillis())
+            def ageInDays = (now.time - buildDate.time) / (1000 * 60 * 60 * 24)
+
+            if (ageInDays > daysToKeep) {
+                try {
+                    println "Deleting build #${build.number} from branch ${branch.name} (Age: ${ageInDays} days)"
+                    build.delete()
+                } catch (UnsupportedOperationException e) {
+                    println "Failed to delete build #${build.number} from branch ${branch.name}: ${e.message}"
+                } catch (Exception e) {
+                    println "An unexpected error occurred while deleting build #${build.number} from branch ${branch.name}: ${e.message}"
+                }
+            }
+        }
+    }
+} else {
+    println "Project '${projectName}' is not a MultiBranchProject or does not exist."
+}
