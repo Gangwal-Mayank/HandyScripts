@@ -1,0 +1,1 @@
+ectool deleteAclEntry --principalType "group" --principalName "Everyone" --objectType "project" --projectName "$[EAI_Name]"
