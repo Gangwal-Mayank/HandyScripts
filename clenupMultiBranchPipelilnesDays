@@ -14,7 +14,8 @@ if (project && project.class.name == 'org.jenkinsci.plugins.workflow.multibranch
             if (ageInDays > daysToKeep) {
                 try {
                     println "Deleting build #${build.number} from branch ${branch.name} (Age: ${ageInDays} days)"
-                    build.delete()
+                    println "Uncomment the below line for actual deletion"
+                    //build.delete()
                 } catch (UnsupportedOperationException e) {
                     println "Failed to delete build #${build.number} from branch ${branch.name}: ${e.message}"
                 } catch (Exception e) {
