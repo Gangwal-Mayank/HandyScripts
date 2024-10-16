@@ -1,0 +1,4 @@
+echo "Cleaning up dsl.txt file"
+
+rm $(pwd)/dsl.txt
+ls -la
