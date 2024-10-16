@@ -1,0 +1,22 @@
+cat <<EOF > ./dsl.txt
+
+aclEntry(
+    principalType : 'group',
+    principalName : 'Everyone',
+    objectType : 'project',
+    projectName : '$[EAI_Name]',
+    readPrivilege : 'deny',
+    modifyPrivilege : 'deny',
+    executePrivilege : 'deny',
+    changePermissionsPrivilege : 'deny'
+    )
+
+EOF
+
+stepResult="Creating dsl.txt file in $(pwd)"
+
+echo $stepResult
+
+read -r -d '' DSL < $(pwd)/dsl.txt
+
+ectool evalDsl "$DSL"
