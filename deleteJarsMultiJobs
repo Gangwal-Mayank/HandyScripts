@@ -1,0 +1,43 @@
+import java.nio.file.*
+
+// List of job names (set this to the names of the jobs you're interested in)
+def jobNames = ["Job1", "Job2", "Job3"]  // Replace with the job names you want to check
+
+// Get the Jenkins home directory from the environment variable
+def jenkinsHome = System.getenv("JENKINS_HOME")
+
+// Check if JENKINS_HOME is defined
+if (!jenkinsHome) {
+    println "Error: JENKINS_HOME environment variable is not set."
+    return
+}
+
+// Minimum file size threshold (100 MB = 100 * 1024 * 1024 bytes)
+def minFileSize = 100 * 1024 * 1024 // 100 MB in bytes
+
+// Loop through each job and check for .xml files greater than 100 MB
+jobNames.each { jobName ->
+    def jobFolder = Paths.get(jenkinsHome, "jobs", jobName)
+
+    // Ensure the job folder exists
+    if (!Files.exists(jobFolder) || !Files.isDirectory(jobFolder)) {
+        println "Error: Job folder does not exist for job ${jobName} at ${jobFolder}"
+        return
+    }
+
+    println "Checking and deleting .xml files greater than 100 MB for job: ${jobName}"
+
+    // Walk through the job folder and subfolders
+    Files.walk(jobFolder).each { path ->
+        // Check if the file ends with .xml and is larger than 100 MB
+        if (path.toString().endsWith(".xml") && Files.size(path) > minFileSize) {
+            println "Deleting file: ${path.toString()}"
+            try {
+                //Files.delete(path)  // Delete the file
+                println "Deleted: ${path.toString()}"
+            } catch (IOException e) {
+                println "Error deleting file ${path.toString()}: ${e.message}"
+            }
+        }
+    }
+}
