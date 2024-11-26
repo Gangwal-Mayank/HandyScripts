@@ -11,7 +11,7 @@ def checkJava8Error(String agentName) {
     def response = process.text
     //println "Response: ${response}"
     if (response.contains("hudson/remoting/Launcher has been compiled by a more recent version of the Java Runtime")) {
-        println("This is because of Java 8 issue.")
+        println("This could be related to Java 8.")
         return true
     } else {
         println("This may not be related to Java 8.")
