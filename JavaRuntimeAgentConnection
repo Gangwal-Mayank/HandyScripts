@@ -5,7 +5,7 @@ def nodesToDelete = []
 
 // Define a function to check if the agent log contains the Java 8 related error
 def checkJava8Error(String agentName) {
-    def url = "https://sda.ssharma.ps.beescloud.com/controller-to-test-cve/computer/${agentName}/logText/progressiveText?start=0"
+    def url = "https://Jenkinshost/controller/computer/${agentName}/logText/progressiveText?start=0"
     def curlCmd = "curl -u user:token ${url}"
     def process = curlCmd.execute()
     def response = process.text
