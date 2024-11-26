@@ -1,0 +1,50 @@
+import jenkins.model.*
+import hudson.model.*
+
+def nodesToDelete = []
+
+// Define a function to check if the agent log contains the Java 8 related error
+def checkJava8Error(String agentName) {
+    def url = "https://sda.ssharma.ps.beescloud.com/controller-to-test-cve/computer/${agentName}/logText/progressiveText?start=0"
+    def curlCmd = "curl -u user:token ${url}"
+    def process = curlCmd.execute()
+    def response = process.text
+    //println "Response: ${response}"
+    if (response.contains("hudson/remoting/Launcher has been compiled by a more recent version of the Java Runtime")) {
+        println("This is because of Java 8 issue.")
+        return true
+    } else {
+        println("This may not be related to Java 8.")
+        return false
+    }
+}
+
+// Get all nodes (agents)
+Jenkins.instance.getNodes().each { node ->
+    def version = node.getComputer().getSystemProperties().get("java.version")
+    if (version) {
+        println("${node.displayName} - Java Version: ${version}")
+    } else {
+        println("${node.displayName} - Agent not able to connect. Checking for Java runtime related issues...")
+
+        // Check the agent log for Java 8 error
+        if (checkJava8Error(node.displayName)) {
+            // If the issue is related to Java 8, mark it for deletion
+            println("Marking node ${node.displayName} for deletion due to Java runtime error.")
+            nodesToDelete.add(node)
+        } else {
+            println("Node ${node.displayName} does not have Java runtime issue, but agent still not able to connect.")
+        }
+    }
+}
+
+// Delete nodes without a Java version or with Java 8 issue
+nodesToDelete.each { node ->
+    try {
+        println("Deleting node: ${node.displayName}")
+        //Jenkins.instance.removeNode(node) // Delete the node - Uncomment this line for actual node deletion
+        //node.getComputer().doDelete()  // Correct method to delete the node
+    } catch (Exception e) {
+        println("Failed to delete node ${node.displayName}: ${e.message}")
+    }
+}
