@@ -1,0 +1,24 @@
+curl -X POST -u "[USERNAME]:[ACCESS TOKEN]" \
+     -H "Content-Type: application/x-www-form-urlencoded" \
+     --data-urlencode "name=example-agent" \
+     --data-urlencode "type=hudson.slaves.DumbSlave"  \
+     --data-urlencode "json=$(< node-config.json)" \
+     "https://[DNS-NAME]/[ControllerName]/computer/doCreateItem"
+
+
+{
+  "name": "example-agent",
+  "nodeDescription": "Example agent created via API",
+  "numExecutors": 2,
+  "remoteFS": "/path/to/agent/workdir",
+  "labelString": "linux docker",
+  "mode": "NORMAL",
+  "type": "hudson.slaves.DumbSlave",
+  "retentionStrategy": {
+    "stapler-class": "hudson.slaves.RetentionStrategy$Always"
+  },
+  "nodeProperties": [],
+  "launcher": {
+    "stapler-class": "hudson.slaves.JNLPLauncher"
+  }
+}
