@@ -1,0 +1,15 @@
+// Get all installed Jenkins plugins
+def plugins = Jenkins.instance.pluginManager.plugins
+
+// Create a list to store plugin names
+def pluginNames = []
+
+// Add the plugin names to the list
+plugins.each {
+    pluginNames.add(it.getShortName())
+}
+
+// Join the list into a comma-separated string
+def result = pluginNames.join(", ")
+
+println result
