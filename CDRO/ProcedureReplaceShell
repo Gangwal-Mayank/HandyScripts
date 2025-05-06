@@ -1,0 +1,36 @@
+import com.electriccloud.client.groovy.ElectricFlow
+import com.electriccloud.client.groovy.models.*
+
+ElectricFlow ef = new ElectricFlow()
+
+def procedures = ef.getProcedures(
+  projectName: "TestProject"
+)
+procedures.procedure.each {
+	procedure ->
+    
+    	println procedure.procedureName
+        
+  		def steps = ef.getSteps(
+  			projectName: "TestProject",
+  			procedureName: procedure.procedureName
+       		)
+        steps.step.each {
+        	step ->
+        
+				println step.stepName
+                println step.shell 
+        		
+                def propertyPath = "/server/ProcedureShellArgs"
+                def newShell1 = step.shell.split(" ")[0]
+                def propnoexp = " \$"+"[/server/ProcedureShellArgs]"
+                def newShell = newShell1 + propnoexp
+                def shell = ef.modifyStep(
+                    projectName: "TestProject",
+                    procedureName: procedure.procedureName,
+                    stepName: step.stepName,
+                    shell: newShell
+                    )
+        }
+
+}
