@@ -3,34 +3,44 @@ import com.electriccloud.client.groovy.models.*
 
 ElectricFlow ef = new ElectricFlow()
 
+def selectedValue = "$[/myJob/Project]"
+
+
 def procedures = ef.getProcedures(
-  projectName: "TestProject"
+    projectName: selectedValue
 )
-procedures.procedure.each {
-	procedure ->
-    
-    	println procedure.procedureName
-        
-  		def steps = ef.getSteps(
-  			projectName: "TestProject",
-  			procedureName: procedure.procedureName
-       		)
-        steps.step.each {
-        	step ->
-        
-		println step.stepName
-                println step.shell 
-        		
-                def propertyPath = "/server/ProcedureShellArgs"
-                def newShell1 = step.shell.split(" ")[0]
-                def propnoexp = " \$"+"[/server/ProcedureShellArgs]"
-                def newShell = newShell1 + propnoexp
-                def shell = ef.modifyStep(
-                    projectName: "TestProject",
-                    procedureName: procedure.procedureName,
-                    stepName: step.stepName,
-                    shell: newShell
-                    )
+
+procedures.procedure.each { procedure ->
+    println procedure.procedureName
+
+    def steps = ef.getSteps(
+        projectName: selectedValue,
+        procedureName: procedure.procedureName
+    )
+
+    steps.step.each { step ->
+        println step.stepName
+        println step.shell
+
+        def shellValue = step.shell?.trim()
+
+        // Skip if shell is null/empty or exactly 'ec-groovy'
+        if (!shellValue || shellValue == "ec-groovy") {
+            return
         }
 
+        // If shell starts with 'ec-groovy ' and has more content
+        if (shellValue.startsWith("ec-groovy ") && shellValue.length() > "ec-groovy ".length()) {
+            def propnoexp = "\$"+"[/server/ProcedureShellArgs]"
+            def newShell = "ec-groovy " + propnoexp
+            println "Updating shell for step '${step.stepName}' in procedure '${procedure.procedureName}' to '${newShell}'"
+
+            ef.modifyStep(
+                projectName: selectedValue,
+                procedureName: procedure.procedureName,
+                stepName: step.stepName,
+                shell: newShell
+            )
+        }
+    }
 }
