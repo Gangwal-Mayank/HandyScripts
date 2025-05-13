@@ -1,0 +1,20 @@
+import jenkins.model.*
+import hudson.model.*
+import java.util.Calendar
+
+def jenkins = Jenkins.instance
+def sixMonthsAgo = Calendar.getInstance()
+sixMonthsAgo.add(Calendar.MONTH, -6)
+
+def jobsRunInLastSixMonths = []
+
+jenkins.allItems.findAll { it instanceof Job }.each { job ->
+    def lastBuild = job.getLastBuild()
+    if (lastBuild != null && lastBuild.getTime().after(sixMonthsAgo.time)) {
+        jobsRunInLastSixMonths << job.fullName
+    }
+}
+
+jobsRunInLastSixMonths.unique().sort().each { jobName ->
+    println jobName
+}
