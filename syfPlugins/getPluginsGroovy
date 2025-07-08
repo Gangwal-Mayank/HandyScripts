@@ -1,0 +1,16 @@
+import jenkins.model.*
+import groovy.json.JsonOutput
+
+def pluginManager = Jenkins.instance.pluginManager
+def plugins = pluginManager.plugins
+
+def pluginList = plugins.collect { plugin ->
+    [
+        id      : plugin.getShortName(),
+        //name    : plugin.getDisplayName()
+        //version : plugin.getVersion()
+    ]
+}
+
+def jsonOutput = JsonOutput.prettyPrint(JsonOutput.toJson(pluginList))
+println(jsonOutput)
