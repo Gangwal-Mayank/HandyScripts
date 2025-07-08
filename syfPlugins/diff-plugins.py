@@ -1,8 +1,8 @@
 import json
 
 # 🔁 Replace with your actual absolute file paths
-file1_path = "/Users/mgangwal/Documents/synchrony/pluginValidation/nocasc-plugins.json"
-file2_path = "/Users/mgangwal/Documents/synchrony/pluginValidation/union-plugins.json"
+file1_path = "/devControllerPlugins.json"
+file2_path = "/union-plugins.json"
 
 # Load plugin data from both files
 with open(file1_path, 'r') as f1:
